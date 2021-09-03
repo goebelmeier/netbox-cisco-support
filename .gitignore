@@ -1,0 +1,9 @@
+.vscode
+env
+.DS_Store
+__pycache__
+dist
+build
+*.egg-info
+develop/dev.env
+netbox_cisco_support/api-answer
