@@ -11,8 +11,6 @@ from dcim.models import Device, DeviceType
 
 class Command(BaseCommand):
     help = 'Sync local devices with Cisco EoX Support API'
-    client_id = 'f4tje6chnxwcp9rrbxw8z8gk'
-    client_secret = 'ytDqdCMuqVhK7yEpZpKqvubQ'
 
     def add_arguments(self, parser):
         # Named (optional) arguments
