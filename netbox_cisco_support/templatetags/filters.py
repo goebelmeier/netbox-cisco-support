@@ -15,6 +15,9 @@ def expires_next_year(value):
 
 @register.filter(is_safe=True)
 def expiration_class(value):
+    if not value:
+        return
+
     if is_expired(value):
         return mark_safe('class="danger"')
     elif expires_next_year(value):
