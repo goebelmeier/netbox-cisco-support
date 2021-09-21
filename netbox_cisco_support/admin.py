@@ -20,6 +20,7 @@ class CiscoSupportAdmin(admin.ModelAdmin):
 class CiscoSupportAdmin(admin.ModelAdmin):
     list_display = (
         "device",
+        "is_covered",
         "coverage_end_date",
         "warranty_end_date"
     )

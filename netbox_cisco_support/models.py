@@ -78,9 +78,15 @@ class CiscoSupport(ChangeLoggedModel):
         return "%s Support" % self.device
 
     coverage_end_date = models.DateField(
-        help_text='End date of the contract coverage for the specifed serial number'
+        help_text='End date of the contract coverage for the specifed serial number',
+        blank=True,
+        null=True
     )
 
-    warranty_end_date = models.DateField(help_text='End date of the warranty for the specified serial number')
+    warranty_end_date = models.DateField(
+        help_text='End date of the warranty for the specified serial number',
+        blank=True,
+        null=True
+    )
 
     is_covered = models.BooleanField(help_text='Indicates whether the specified serial number is covered by a service contract', default=False)

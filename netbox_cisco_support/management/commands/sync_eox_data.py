@@ -1,4 +1,5 @@
 from develop.configuration import CISCO_CLIENT_ID, CISCO_CLIENT_SECRET
+from pprint import pprint
 import requests
 import json
 import django.utils.text
@@ -8,7 +9,7 @@ from datetime import datetime
 from requests import api
 from dcim.models import Manufacturer
 from dcim.models import Device, DeviceType
-from netbox_cisco_support.models import CiscoDeviceTypeSupport
+from netbox_cisco_support.models import CiscoDeviceTypeSupport, CiscoSupport
 
 
 class Command(BaseCommand):
@@ -22,6 +23,58 @@ class Command(BaseCommand):
             default='Cisco',
             help='Manufacturer name (default: Cisco)',
         )
+
+    def update_device_eox_data(self, device):
+        self.stdout.write(self.style.SUCCESS("Trying to update device %s" % device['sr_no']))
+
+        d = Device.objects.get(serial=device['sr_no'])
+
+        try:
+            ds = CiscoSupport.objects.get(device=d)
+        except CiscoSupport.DoesNotExist:
+            ds = CiscoSupport(device=d)
+
+        value_changed = False
+
+        covered = True if device['is_covered'] == "YES" else False
+
+        self.stdout.write(self.style.SUCCESS("%s - covered: %s" % (device['sr_no'], covered)))
+        if ds.is_covered != covered:
+            ds.is_covered = covered
+            value_changed = True
+
+        try:
+            if not device['warranty_end_date']:
+                self.stdout.write(self.style.NOTICE("%s has no warranty_end_date" % device['sr_no']))
+            else:
+                warranty_end_date_string = device['warranty_end_date']
+                warranty_end_date = datetime.strptime(warranty_end_date_string, '%Y-%m-%d').date()
+                self.stdout.write(self.style.SUCCESS("%s - warranty_end_date: %s" % (device['sr_no'], warranty_end_date)))
+
+                if ds.warranty_end_date != warranty_end_date:
+                    ds.warranty_end_date = warranty_end_date
+                    value_changed = True
+        except KeyError:
+            self.stdout.write(self.style.NOTICE("%s has no warranty_end_date" % device['sr_no']))
+
+        try:
+            if not device['covered_product_line_end_date']:
+                self.stdout.write(self.style.NOTICE("%s has no covered_product_line_end_date" % device['sr_no']))
+            else:
+                coverage_end_date_string = device['covered_product_line_end_date']
+                coverage_end_date = datetime.strptime(coverage_end_date_string, '%Y-%m-%d').date()
+                self.stdout.write(self.style.SUCCESS("%s - coverage_end_date: %s" % (device['sr_no'], coverage_end_date)))
+
+                if ds.coverage_end_date != coverage_end_date:
+                    ds.coverage_end_date = coverage_end_date
+                    value_changed = True
+        except KeyError:
+            self.stdout.write(self.style.NOTICE("%s has no coverage_end_date" % device['sr_no']))
+
+        if value_changed:
+            ds.save()
+
+        return
 
     def update_device_type_eox_data(self, pid, eox_data):
         # Get the device type object for the supplied PID
@@ -51,6 +104,7 @@ class Command(BaseCommand):
                 if dts.end_of_sale_date != end_of_sale_date:
                     dts.end_of_sale_date = end_of_sale_date
                     value_changed = True
+
         # Do nothing when JSON field does not exist
         except KeyError:
             self.stdout.write(self.style.NOTICE("%s has no end_of_sale_date" % pid))
@@ -162,11 +216,12 @@ class Command(BaseCommand):
         return dt
 
     def get_product_ids(self, manufacturer):
-        i = 0
         product_ids = []
 
+        # Get all device types for supplied manufacturer
         dt = self.get_device_types(manufacturer)
 
+        # Iterate all this device types
         for device_type in dt:
 
             # Skip if the device type has no valid part number. Part numbers must match the exact Cisco Base PID
@@ -180,47 +235,52 @@ class Command(BaseCommand):
 
         return product_ids
 
-    def get_serial_numbers(self, dtype):
-        # trying to get all devices and its serial numbers for this device type (for contract data)
-        try:
-            d = Device.objects.filter(device_type=dtype)
+    def get_serial_numbers(self, manufacturer):
+        serial_numbers = []
 
-            for device in d:
+        # Get all device types for supplied manufacturer
+        dt = self.get_device_types(manufacturer)
 
-                # Skip if the device has no valid serial number.
-                if not device.serial:
-                    self.stdout.write(self.style.WARNING('Found device "%s" WITHOUT Serial Number - SKIPPING' % (device)))
-                    continue
+        # Iterate all this device types
+        for device_type in dt:
+            # trying to get all devices and its serial numbers for this device type (for contract data)
+            try:
+                d = Device.objects.filter(device_type=device_type)
 
-                # TODO - Add serial number to a list and do something with it rather than displaying.
-                self.stdout.write(self.style.SUCCESS('Found device "%s" with Serial Number "%s"' % (device, device.serial)))
-        except Device.DoesNotExist:
-            raise CommandError('Device with device type "%s" does not exist' % dtype)
-        return
+                for device in d:
+                    # Skip if the device has no valid serial number.
+                    if not device.serial:
+                        self.stdout.write(self.style.WARNING('Found device "%s" WITHOUT Serial Number - SKIPPING' % (device)))
+                        continue
+
+                    # TODO - Add serial number to a list and do something with it rather than displaying.
+                    self.stdout.write(self.style.SUCCESS('Found device "%s" with Serial Number "%s"' % (device, device.serial)))
+                    serial_numbers.append(device.serial)
+            except Device.DoesNotExist:
+                raise CommandError('Device with device type "%s" does not exist' % dt)
+
+        return serial_numbers
 
     def logon(self):
         token_url = "https://cloudsso.cisco.com/as/token.oauth2"
         data = {'grant_type': 'client_credentials', 'client_id': CISCO_CLIENT_ID, 'client_secret': CISCO_CLIENT_SECRET}
 
         access_token_response = requests.post(token_url, data=data)
-        # self.stdout.write(self.style.NOTICE(access_token_response.text))
 
         tokens = json.loads(access_token_response.text)
-        # self.stdout.write(self.style.NOTICE("access token: %s" % tokens['access_token'])
 
         api_call_headers = {'Authorization': 'Bearer ' + tokens['access_token'], 'Accept': 'application/json'}
 
         return api_call_headers
 
     def handle(self, *args, **kwargs):
-        product_ids = self.get_product_ids(kwargs['manufacturer'])
-
-        self.stdout.write(self.style.SUCCESS('Gathering data for these PIDs: ' + ', '.join(product_ids)))
-
         api_call_headers = self.logon()
 
-        i = 1
+        """
+        product_ids = self.get_product_ids(kwargs['manufacturer'])
+        self.stdout.write(self.style.SUCCESS('Gathering data for these PIDs: ' + ', '.join(product_ids)))
 
+        i = 1
         for pid in product_ids:
             # if i == 10:
             #     break
@@ -239,5 +299,29 @@ class Command(BaseCommand):
             data = json.loads(api_call_response.text)
 
             self.update_device_type_eox_data(pid, data)
+
+            i += 1
+        """
+
+        serial_numbers = self.get_serial_numbers(kwargs['manufacturer'])
+        self.stdout.write(self.style.SUCCESS('Gathering data for these Serial Numbers: ' + ', '.join(serial_numbers)))
+
+        i = 1
+        while serial_numbers:
+            # Pop the first items_to_fetch items of serial_numbers into current_slice and then delete them from serial
+            # numbers. We want to pass x items to the API each time we call it
+            items_to_fetch = 10
+            current_slice = serial_numbers[:items_to_fetch]
+            serial_numbers[:items_to_fetch] = []
+
+            url = 'https://api.cisco.com/sn2info/v2/coverage/summary/serial_numbers/%s' % ','.join(current_slice)
+            api_call_response = requests.get(url, headers=api_call_headers)
+            self.stdout.write(self.style.SUCCESS('Call ' + url))
+
+            data = json.loads(api_call_response.text)
+
+            for device in data['serial_numbers']:
+                # print("Serial: %s - Is Covered?: %s - Warranty End Date: %s - Covered Product Line End Date: %s" % (device['sr_no'], device['is_covered'], device['warranty_end_date'], device['covered_product_line_end_date']))
+                self.update_device_eox_data(device)
 
             i += 1
