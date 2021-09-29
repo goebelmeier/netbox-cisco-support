@@ -42,6 +42,23 @@ Sync Cisco EoX data for the first time
 (venv) $ python3 manage.py sync_eox_data
 ````
 
+To periodically refresh EoX data create a cronjob which calls `sync_eox_data` periodically
+```
+$ cat /etc/cron.d/netbox_sync_eox_data
+
+# Update Cisco EoX Data every Saturday at 14:03
+MAILTO="mail@example.com"
+3 14 * * 6 /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py sync_eox_data
+```
+
+or log into /tmp file
+```
+$ cat /etc/cron.d/netbox_sync_eox_data
+
+# Update Cisco EoX Data every Saturday at 14:03
+3 14 * * 6 /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py sync_eox_data > /tmp/netbox_sync_eox_data
+```
+
 ## Configuration
 The following options are available:
 * `cisco_client_id`: String - Client ID of your plugin installation. Generate it inside [Cisco API Console](https://apiconsole.cisco.com/)
