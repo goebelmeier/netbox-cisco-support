@@ -28,6 +28,7 @@ setup(
     description='Implementing Cisco Support APIs into NetBox',
     url='https://github.com/goebelmeier/netbox-cisco-support',
     author='Timo Reimann',
+    author_email='timo@goebelmeier.de',
     license='Apache 2.0',
     install_requires=[],
     packages=find_packages(),
