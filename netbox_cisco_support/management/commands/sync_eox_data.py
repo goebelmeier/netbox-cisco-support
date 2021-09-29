@@ -1,9 +1,8 @@
-from develop.configuration import CISCO_CLIENT_ID, CISCO_CLIENT_SECRET
-from pprint import pprint
 import requests
 import json
 import django.utils.text
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from datetime import datetime
 from requests import api
@@ -269,6 +268,10 @@ class Command(BaseCommand):
         return serial_numbers
 
     def logon(self):
+        PLUGIN_SETTINGS = settings.PLUGINS_CONFIG.get("netbox_cisco_support", dict())
+        CISCO_CLIENT_ID = PLUGIN_SETTINGS.get("cisco_client_id", "")
+        CISCO_CLIENT_SECRET = PLUGIN_SETTINGS.get("cisco_client_secret", "")
+
         token_url = "https://cloudsso.cisco.com/as/token.oauth2"
         data = {'grant_type': 'client_credentials', 'client_id': CISCO_CLIENT_ID, 'client_secret': CISCO_CLIENT_SECRET}
 

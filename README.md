@@ -39,7 +39,8 @@ Restart NetBox and add `netbox-cisco-support` to your `local_requirements.txt`
 Sync Cisco EoX data for the first time
 ```
 (venv) $ cd /opt/netbox/netbox/
-(venv) $ python3 manage.py migrate
+(venv) $ python3 manage.py sync_eox_data
+````
 
 ## Configuration
 The following options are available:

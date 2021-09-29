@@ -11,7 +11,7 @@ class CiscoSupportConfig(PluginConfig):
     author_email = 'timo@goebelmeier.de'
     base_url = 'cisco-support'
     min_version = '3.0.3'
-    required_settings = []
+    required_settings = ['cisco_client_id', 'cisco_client_secret']
     default_settings = {
         'device_ext_page': 'right'
     }
