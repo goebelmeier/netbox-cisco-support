@@ -48,7 +48,7 @@ $ cat /etc/cron.d/netbox_sync_eox_data
 
 # Update Cisco EoX Data every Saturday at 14:03
 MAILTO="mail@example.com"
-3 14 * * 6 /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py sync_eox_data
+3 14 * * 6 root /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py sync_eox_data
 ```
 
 or log into /tmp file
@@ -56,7 +56,7 @@ or log into /tmp file
 $ cat /etc/cron.d/netbox_sync_eox_data
 
 # Update Cisco EoX Data every Saturday at 14:03
-3 14 * * 6 /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py sync_eox_data > /tmp/netbox_sync_eox_data
+3 14 * * 6 root /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py sync_eox_data > /tmp/netbox_sync_eox_data
 ```
 
 ## Configuration
