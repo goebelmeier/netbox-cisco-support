@@ -13,7 +13,7 @@ class CiscoSupportConfig(PluginConfig):
     min_version = '3.0.3'
     required_settings = ['cisco_client_id', 'cisco_client_secret']
     default_settings = {
-        'device_ext_page': 'right'
+        'manufacturer': 'Cisco'
     }
 
 

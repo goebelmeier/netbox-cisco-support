@@ -285,11 +285,14 @@ class Command(BaseCommand):
 
     # Main entry point for the sync_eox_data command of manage.py
     def handle(self, *args, **kwargs):
+        PLUGIN_SETTINGS = settings.PLUGINS_CONFIG.get("netbox_cisco_support", dict())
+        MANUFACTURER = PLUGIN_SETTINGS.get("manufacturer", "Cisco")
+
         # Logon one time and gather the required API key
         api_call_headers = self.logon()
 
         # Step 1: Get all PIDs for all Device Types of that particular manufacturer
-        product_ids = self.get_product_ids(kwargs['manufacturer'])
+        product_ids = self.get_product_ids(MANUFACTURER)
         self.stdout.write(self.style.SUCCESS('Gathering data for these PIDs: ' + ', '.join(product_ids)))
 
         i = 1

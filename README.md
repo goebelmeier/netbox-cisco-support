@@ -64,4 +64,29 @@ The following options are available:
 * `cisco_client_id`: String - Client ID of your plugin installation. Generate it inside [Cisco API Console](https://apiconsole.cisco.com/)
 * `cisco_client_secret`: String - Client Secret of your plugin installation. Generate it inside [Cisco API Console](https://apiconsole.cisco.com/)
 
+## Requirements
+In order to get the correct data using the API, several requirements must be fulfilled:
+1. A [Cisco API ID and secret](https://apiconsole.cisco.com/) must have been created and configured inside `configuration.py`
+2. A manufacturer called `Cisco` must have been configured inside NetBox. If your manufacturer is named differently, change if inside `configuration.py`:
+```
+PLUGINS_CONFIG = {
+    'netbox_cisco_support': {
+        ...,
+        'manufacturer': 'Cisco Systems' # Optional setting for definiing the manufacturer
+    }
+}
+```
+3. All devices types for manufacturer Cisco must have filled the optional `Part number` field inside NetBox with the correct Base PID for that Cisco product.
+4. All devices with devices types from manufacturer Cisco must have filled the `Serial Number` field inside NetBox with a valid Cisco serial number for that Cisco product.
+5. If you want full visibility, the support contracts for all your devices needs to be associated with the CCO ID which has been used for created the API ID and secret. Otherwise you will only get a coverage true/false answer, but no detailed information regarding end of support contract coverage.
+
+## How it works
+1. Calling the sync_eox_data method will catch all device types for the configured manufacturer
+2. Each device types `Part number` will be send to Cisco EoX API. API answer will be saved inside a `CiscoDeviceTypeSupport` model. One CiscoDeviceTypeSupport per device.
+3. Afterwards all devices for the configured manufacturer will be gathered
+4. Each devices `Serial number` will be send to Cisco sn2info coverage API. API answer will be saved inside a `CiscoDeviceSupport` model. One CiscoDeviceSupport per device.
+5. The device type template will be extended to display this data. Information will be shown, if a `CiscoDeviceTypeSupport` object for that device type exists.
+6. The device template will be exteneded to display device and device type information. Information will be shown, if a `CiscoDeviceSupport` object for that device exists. Additionally device type information will be shown, if a `CiscoDeviceTypeSupport` object for the parent device type exists.
+7. Coloring: Expired timestamps will be colored red, timestamps which will expire in the next calendar year will be colored yellow for planning / forecast reasons.
 ## Screenshots
+![Screenshot](screenshot.png)
