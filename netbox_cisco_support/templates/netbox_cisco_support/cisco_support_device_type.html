@@ -1,42 +1,42 @@
 {% load filters %}
 
 {% if cisco_device_type_support %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <strong>Cisco Device Type Support Information</strong>
+    <div class="card">
+        <h5 class="card-header">Cisco Device Type Support Information</h5>
+        <div class="card-body">
+            <table class="table table-hover panel-body attr-table">
+                <tbody>
+                    <tr {{ cisco_device_type_support.end_of_sale_date|expiration_class }}>
+                        <td style="width: 40%">End-of-Sale Date</td>
+                        <td>{{ cisco_device_type_support.end_of_sale_date }}</td>
+                    </tr>
+                    <tr {{ cisco_device_type_support.end_of_sw_maintenance_releases|expiration_class }}>
+                        <td>End of SW Maintenance Releases Date</td>
+                        <td>{{ cisco_device_type_support.end_of_sw_maintenance_releases }}</td>
+                    </tr>
+                    <tr {{ cisco_device_type_support.end_of_routine_failure_analysis_date|expiration_class }}>
+                        <td>End of Routine Failure Analysis Date</td>
+                        <td>{{ cisco_device_type_support.end_of_routine_failure_analysis_date }}</td>
+                    </tr>
+                    <tr {{ cisco_device_type_support.end_of_svc_attach_date|expiration_class }}>
+                        <td>End of New Service Attachment Date</td>
+                        <td>{{ cisco_device_type_support.end_of_svc_attach_date }}</td>
+                    </tr>
+                    <tr {{ cisco_device_type_support.end_of_service_contract_renewal|expiration_class }}>
+                        <td>End of Service Contract Renewal Date</td>
+                        <td>{{ cisco_device_type_support.end_of_service_contract_renewal }}</td>
+                    </tr>
+                    <tr {{ cisco_device_type_support.end_of_security_vul_support_date|expiration_class }}>
+                        <td>End of Vulnerability/Security Support</td>
+                        <td>{{ cisco_device_type_support.end_of_security_vul_support_date }}</td>
+                    </tr>
+                    <tr {{ cisco_device_type_support.last_date_of_support|expiration_class }}>
+                        <td>Last Date of Support</td>
+                        <td>{{ cisco_device_type_support.last_date_of_support }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <table class="table table-hover panel-body attr-table">
-            <tbody>
-                <tr {{ cisco_device_type_support.end_of_sale_date|expiration_class }}>
-                    <td style="width: 40%">End-of-Sale Date</td>
-                    <td>{{ cisco_device_type_support.end_of_sale_date }}</td>
-                </tr>
-                <tr {{ cisco_device_type_support.end_of_sw_maintenance_releases|expiration_class }}>
-                    <td>End of SW Maintenance Releases Date</td>
-                    <td>{{ cisco_device_type_support.end_of_sw_maintenance_releases }}</td>
-                </tr>
-                <tr {{ cisco_device_type_support.end_of_routine_failure_analysis_date|expiration_class }}>
-                    <td>End of Routine Failure Analysis Date</td>
-                    <td>{{ cisco_device_type_support.end_of_routine_failure_analysis_date }}</td>
-                </tr>
-                <tr {{ cisco_device_type_support.end_of_svc_attach_date|expiration_class }}>
-                    <td>End of New Service Attachment Date</td>
-                    <td>{{ cisco_device_type_support.end_of_svc_attach_date }}</td>
-                </tr>
-                <tr {{ cisco_device_type_support.end_of_service_contract_renewal|expiration_class }}>
-                    <td>End of Service Contract Renewal Date</td>
-                    <td>{{ cisco_device_type_support.end_of_service_contract_renewal }}</td>
-                </tr>
-                <tr {{ cisco_device_type_support.end_of_security_vul_support_date|expiration_class }}>
-                    <td>End of Vulnerability/Security Support</td>
-                    <td>{{ cisco_device_type_support.end_of_security_vul_support_date }}</td>
-                </tr>
-                <tr {{ cisco_device_type_support.last_date_of_support|expiration_class }}>
-                    <td>Last Date of Support</td>
-                    <td>{{ cisco_device_type_support.last_date_of_support }}</td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 {% else %}
     {# no Cisco Device Type Support information available #}

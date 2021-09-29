@@ -1,26 +1,26 @@
 {% load filters %}
 
 {% if cisco_device_support %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <strong>Cisco Device Support Information</strong>
+    <div class="card">
+        <h5 class="card-header">Cisco Device Support Information</h5>
+        <div class="card-body">
+            <table class="table table-hover panel-body attr-table">
+                <tbody>
+                    <tr >
+                        <td style="width: 40%">Is Covered by Contract?</td>
+                        <td><i class="mdi {% if cisco_device_support.is_covered %}mdi-check-bold text-success{% else %}mdi-close-thick text-danger{% endif %}"></i></td>
+                    </tr>
+                    <tr {{ cisco_device_support.coverage_end_date|expiration_class }}>
+                        <td>End of Contract Coverage Date</td>
+                        <td>{{ cisco_device_support.coverage_end_date }}</td>
+                    </tr>
+                    <tr {{ cisco_device_support.warranty_end_date|expiration_class }}>
+                        <td>End of Warranty Date</td>
+                        <td>{{ cisco_device_support.warranty_end_date }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <table class="table table-hover panel-body attr-table">
-            <tbody>
-                <tr {{ cisco_device_support.is_covered|coverage_class }}>
-                    <td style="width: 40%">Is Covered by Contract?</td>
-                    <td><span class="glyphicon {% if cisco_device_support.is_covered %}glyphicon-ok{% else %}glyphicon-remove{% endif %}" aria-hidden="true"></span></td>
-                </tr>
-                <tr {{ cisco_device_support.coverage_end_date|expiration_class }}>
-                    <td>End of Contract Coverage Date</td>
-                    <td>{{ cisco_device_support.coverage_end_date }}</td>
-                </tr>
-                <tr {{ cisco_device_support.warranty_end_date|expiration_class }}>
-                    <td>End of Warranty Date</td>
-                    <td>{{ cisco_device_support.warranty_end_date }}</td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 {% else %}
     {# no Cisco Device Support information available #}

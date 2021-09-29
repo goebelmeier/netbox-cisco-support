@@ -24,21 +24,28 @@ class Command(BaseCommand):
             help='Manufacturer name (default: Cisco)',
         )
 
+    # Updates a single device with current EoX Data
     def update_device_eox_data(self, device):
         self.stdout.write(self.style.SUCCESS("Trying to update device %s" % device['sr_no']))
 
+        # Get the device object from NetBox
         d = Device.objects.get(serial=device['sr_no'])
 
+        # Check if a CiscoSupport object already exists, if not, create a new one
         try:
             ds = CiscoSupport.objects.get(device=d)
         except CiscoSupport.DoesNotExist:
             ds = CiscoSupport(device=d)
 
+        # Control variable to only save the object if something has changed
         value_changed = False
 
+        # A "YES" string is not quite boolean :-)
         covered = True if device['is_covered'] == "YES" else False
 
         self.stdout.write(self.style.SUCCESS("%s - covered: %s" % (device['sr_no'], covered)))
+
+        # Check if the Coverage in the CiscoSupport object equals API answer. If not, change it
         if ds.is_covered != covered:
             ds.is_covered = covered
             value_changed = True
@@ -113,7 +120,7 @@ class Command(BaseCommand):
             if not eox_data["EOXRecord"][0]["EndOfSWMaintenanceReleases"]["value"]:
                 self.stdout.write(self.style.NOTICE("%s has no end_of_sw_maintenance_releases" % pid))
             else:
-                end_of_sw_maintenance_releases_string = eox_data["EOXRecord"][0]["EndOfSaleDate"]["value"]
+                end_of_sw_maintenance_releases_string = eox_data["EOXRecord"][0]["EndOfSWMaintenanceReleases"]["value"]
                 end_of_sw_maintenance_releases = datetime.strptime(end_of_sw_maintenance_releases_string, '%Y-%m-%d').date()
                 self.stdout.write(self.style.SUCCESS("%s - end_of_sw_maintenance_releases: %s" % (pid, end_of_sw_maintenance_releases)))
 
@@ -169,7 +176,7 @@ class Command(BaseCommand):
             if not eox_data["EOXRecord"][0]["LastDateOfSupport"]["value"]:
                 self.stdout.write(self.style.NOTICE("%s has no last_date_of_support" % pid))
             else:
-                last_date_of_support_string = eox_data["EOXRecord"][0]["EndOfSaleDate"]["value"]
+                last_date_of_support_string = eox_data["EOXRecord"][0]["LastDateOfSupport"]["value"]
                 last_date_of_support = datetime.strptime(last_date_of_support_string, '%Y-%m-%d').date()
                 self.stdout.write(self.style.SUCCESS("%s - last_date_of_support: %s" % (pid, last_date_of_support)))
 
@@ -273,18 +280,17 @@ class Command(BaseCommand):
 
         return api_call_headers
 
+    # Main entry point for the sync_eox_data command of manage.py
     def handle(self, *args, **kwargs):
+        # Logon one time and gather the required API key
         api_call_headers = self.logon()
 
-        """
+        # Step 1: Get all PIDs for all Device Types of that particular manufacturer
         product_ids = self.get_product_ids(kwargs['manufacturer'])
         self.stdout.write(self.style.SUCCESS('Gathering data for these PIDs: ' + ', '.join(product_ids)))
 
         i = 1
         for pid in product_ids:
-            # if i == 10:
-            #     break
-
             url = 'https://api.cisco.com/supporttools/eox/rest/5/EOXByProductID/1/%s?responseencoding=json' % pid
             api_call_response = requests.get(url, headers=api_call_headers)
             self.stdout.write(self.style.SUCCESS('Call ' + url))
@@ -293,16 +299,18 @@ class Command(BaseCommand):
             filename = django.utils.text.get_valid_filename('%s.json' % pid)
 
             # debug API answer to text file
-            with open('/source/netbox_cisco_support/api-answer/%s' % filename, 'w') as outfile:
-                outfile.write(api_call_response.text)
+            # with open('/source/netbox_cisco_support/api-answer/%s' % filename, 'w') as outfile:
+            #    outfile.write(api_call_response.text)
 
+            # Deserialize JSON API Response into Python object "data"
             data = json.loads(api_call_response.text)
 
+            # Call our Device Type Update method for that particular PID
             self.update_device_type_eox_data(pid, data)
 
             i += 1
-        """
 
+        # Step 2: Get all Serial Numbers for all Devices of that particular manufacturer
         serial_numbers = self.get_serial_numbers(kwargs['manufacturer'])
         self.stdout.write(self.style.SUCCESS('Gathering data for these Serial Numbers: ' + ', '.join(serial_numbers)))
 
@@ -318,10 +326,13 @@ class Command(BaseCommand):
             api_call_response = requests.get(url, headers=api_call_headers)
             self.stdout.write(self.style.SUCCESS('Call ' + url))
 
+            # Deserialize JSON API Response into Python object "data"
             data = json.loads(api_call_response.text)
 
+            # Iterate through all serial numbers included in the API response
             for device in data['serial_numbers']:
-                # print("Serial: %s - Is Covered?: %s - Warranty End Date: %s - Covered Product Line End Date: %s" % (device['sr_no'], device['is_covered'], device['warranty_end_date'], device['covered_product_line_end_date']))
+
+                # Call our Device Update method for that particular Device
                 self.update_device_eox_data(device)
 
             i += 1
