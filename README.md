@@ -66,7 +66,7 @@ The following options are available:
 
 ## Requirements
 In order to get the correct data using the API, several requirements must be fulfilled:
-1. A [Cisco API ID and secret](https://apiconsole.cisco.com/) must have been created and configured inside `configuration.py`
+1. A [Cisco API ID and secret](https://apiconsole.cisco.com/) (with access to the APIs "EOX V5 API" and "Serial Number to Information API Version 2") must have been created and configured inside `configuration.py`
 2. A manufacturer called `Cisco` must have been configured inside NetBox. If your manufacturer is named differently, change if inside `configuration.py`:
 ```
 PLUGINS_CONFIG = {
