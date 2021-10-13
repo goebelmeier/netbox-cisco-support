@@ -317,7 +317,7 @@ class Command(BaseCommand):
             i += 1
 
         # Step 2: Get all Serial Numbers for all Devices of that particular manufacturer
-        serial_numbers = self.get_serial_numbers(kwargs['manufacturer'])
+        serial_numbers = self.get_serial_numbers(MANUFACTURER)
         self.stdout.write(self.style.SUCCESS('Gathering data for these Serial Numbers: ' + ', '.join(serial_numbers)))
 
         i = 1
