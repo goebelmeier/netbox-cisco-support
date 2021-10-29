@@ -308,13 +308,22 @@ class Command(BaseCommand):
             # with open('/source/netbox_cisco_support/api-answer/%s' % filename, 'w') as outfile:
             #    outfile.write(api_call_response.text)
 
-            # Deserialize JSON API Response into Python object "data"
-            data = json.loads(api_call_response.text)
+            # Validate response from Cisco 
+            if api_call_response.status_code == 200:
 
-            # Call our Device Type Update method for that particular PID
-            self.update_device_type_eox_data(pid, data)
+                # Deserialize JSON API Response into Python object "data"
+                data = json.loads(api_call_response.text)
 
-            i += 1
+                # Call our Device Type Update method for that particular PID
+                self.update_device_type_eox_data(pid, data)
+
+                i += 1
+
+            else:
+
+                # Show an error
+                self.stdout.write(self.style.ERROR('API Error: ' + api_call_response.text))
+
 
         # Step 2: Get all Serial Numbers for all Devices of that particular manufacturer
         serial_numbers = self.get_serial_numbers(MANUFACTURER)
@@ -332,13 +341,21 @@ class Command(BaseCommand):
             api_call_response = requests.get(url, headers=api_call_headers)
             self.stdout.write(self.style.SUCCESS('Call ' + url))
 
-            # Deserialize JSON API Response into Python object "data"
-            data = json.loads(api_call_response.text)
+            # Validate response from Cisco 
+            if api_call_response.status_code == 200:
 
-            # Iterate through all serial numbers included in the API response
-            for device in data['serial_numbers']:
+                # Deserialize JSON API Response into Python object "data"
+                data = json.loads(api_call_response.text)
 
-                # Call our Device Update method for that particular Device
-                self.update_device_eox_data(device)
+                # Iterate through all serial numbers included in the API response
+                for device in data['serial_numbers']:
 
-            i += 1
+                    # Call our Device Update method for that particular Device
+                    self.update_device_eox_data(device)
+
+                i += 1
+            
+            else:
+
+                # Show an error
+                self.stdout.write(self.style.ERROR('API Error: ' + api_call_response.text))
