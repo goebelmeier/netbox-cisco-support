@@ -4,6 +4,7 @@ import django.utils.text
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from django.core.exceptions import MultipleObjectsReturned
 from datetime import datetime
 from requests import api
 from dcim.models import Manufacturer
@@ -28,7 +29,13 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Trying to update device %s" % device['sr_no']))
 
         # Get the device object from NetBox
-        d = Device.objects.get(serial=device['sr_no'])
+        try:
+            d = Device.objects.get(serial=device['sr_no'])
+        except MultipleObjectsReturned:
+
+            # Error if netbox has multiple SN's and skip updating
+            self.stdout.write(self.style.NOTICE("ERROR: Multiple objects exist within Netbox with Serial Number " + device['sr_no']))
+            return
 
         # Check if a CiscoSupport object already exists, if not, create a new one
         try:
@@ -83,8 +90,16 @@ class Command(BaseCommand):
         return
 
     def update_device_type_eox_data(self, pid, eox_data):
-        # Get the device type object for the supplied PID
-        dt = DeviceType.objects.get(part_number=pid)
+
+        try:
+            # Get the device type object for the supplied PID
+            dt = DeviceType.objects.get(part_number=pid)
+
+        except MultipleObjectsReturned:
+
+            # Error if netbox has multiple PN's
+            self.stdout.write(self.style.NOTICE("ERROR: Multiple objects exist within Netbox with Part Number " + pid))
+            return
 
         # Check if CiscoDeviceTypeSupport record already exists
         try:
