@@ -1,0 +1,18 @@
+version: '3.4'
+services:
+  netbox:
+    image: netbox:develop
+    ports:
+      - 8000:8080
+    volumes:
+      - ../netbox_cisco_support:/source/netbox_cisco_support
+  netbox-worker:
+    build:
+      context: ../
+      dockerfile: develop/Dockerfile
+    image: netbox:develop
+    volumes:
+      - ../netbox_cisco_support:/source/netbox_cisco_support
+  postgres:
+    ports:
+      - 5432:5432

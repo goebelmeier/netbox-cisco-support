@@ -1,0 +1,12 @@
+- name: ios
+  slug: ios
+  manufacturer: Cisco Systems
+  napalm_driver: ios
+- name: eos
+  slug: eos
+  manufacturer: Arista Networks
+  napalm_driver: eos
+- name: junos
+  slug: junos
+  manufacturer: Juniper Networks
+  napalm_driver: junos

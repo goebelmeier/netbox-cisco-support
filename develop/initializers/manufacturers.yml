@@ -1,0 +1,6 @@
+- name: Cisco Systems
+  slug: cisco
+- name: Arista Networks
+  slug: arista
+- name: Juniper Networks
+  slug: juniper
