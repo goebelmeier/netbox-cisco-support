@@ -1,0 +1,8 @@
+- cluster: cluster1
+  name: vEOS1
+  platform: eos
+  status: active
+- cluster: cluster1
+  name: vEOS2
+  platform: eos
+  status: active

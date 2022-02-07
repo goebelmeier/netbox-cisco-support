@@ -1,0 +1,6 @@
+- name: cluster1
+  type: Hyper-V
+  site: Site_1
+- name: cluster2
+  type: Hyper-V
+  site: Site_2

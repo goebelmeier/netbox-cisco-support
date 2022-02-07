@@ -1,0 +1,8 @@
+- name: Site_1
+  slug: site_1
+  region: Region_1
+  status: active
+- name: Site_2
+  slug: site_2
+  region: Region_2
+  status: active

@@ -1,0 +1,16 @@
+- model: DCS-7150S-52
+  manufacturer: Arista Networks
+  slug: dcs-7150s-52
+  u_height: 1
+- model: ISR4451-X
+  manufacturer: Cisco Systems
+  slug: isr4451-x
+  u_height: 2
+- model: WS-C3850-48F-S
+  manufacturer: Cisco Systems
+  slug: ws-c3850-48f-s
+  u_height: 1
+- model: MX80
+  manufacturer: Juniper Networks
+  slug: mx80
+  u_height: 2
