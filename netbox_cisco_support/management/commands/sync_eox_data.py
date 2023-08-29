@@ -287,7 +287,7 @@ class Command(BaseCommand):
         CISCO_CLIENT_ID = PLUGIN_SETTINGS.get("cisco_client_id", "")
         CISCO_CLIENT_SECRET = PLUGIN_SETTINGS.get("cisco_client_secret", "")
 
-        token_url = "https://cloudsso.cisco.com/as/token.oauth2"
+        token_url = "https://id.cisco.com/oauth2/default/v1/token"
         data = {'grant_type': 'client_credentials', 'client_id': CISCO_CLIENT_ID, 'client_secret': CISCO_CLIENT_SECRET}
 
         access_token_response = requests.post(token_url, data=data)
@@ -312,7 +312,7 @@ class Command(BaseCommand):
 
         i = 1
         for pid in product_ids:
-            url = 'https://api.cisco.com/supporttools/eox/rest/5/EOXByProductID/1/%s?responseencoding=json' % pid
+            url = 'https://apix.cisco.com/supporttools/eox/rest/5/EOXByProductID/1/%s?responseencoding=json' % pid
             api_call_response = requests.get(url, headers=api_call_headers)
             self.stdout.write(self.style.SUCCESS('Call ' + url))
 
